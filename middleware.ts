@@ -6,7 +6,11 @@ export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
   const { pathname } = request.nextUrl;
 
-  if (pathname === '/landing') {
+  if (
+    pathname === '/landing' ||
+    pathname === '/sso' ||
+    pathname.startsWith('/auth')
+  ) {
     return response;
   }
 
