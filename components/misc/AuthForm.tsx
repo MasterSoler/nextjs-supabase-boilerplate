@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ContinueWithOweb } from '@/components/misc/ContinueWithOweb';
+import { persistWorkspaceId } from '@/lib/oweb/workspace-storage';
 import { verifyUserTenant } from '@/utils/auth-helpers';
 import { useTenant } from '@/utils/tenant-context';
 
@@ -51,7 +53,18 @@ export default function AuthForm({ state = 'signin' }: AuthFormProps) {
         // Store tenant in localStorage for persistence
         localStorage.setItem('currentTenant', JSON.stringify(defaultTenant));
 
-        await fetch('/api/oweb/activate', { method: 'POST' }).catch(() => undefined);
+        const activateRes = await fetch('/api/oweb/activate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ activation_kind: 'sign_in' })
+        }).catch(() => null);
+
+        if (activateRes?.ok) {
+          const payload = (await activateRes.json().catch(() => ({}))) as {
+            workspace_id?: string;
+          };
+          if (payload.workspace_id) persistWorkspaceId(payload.workspace_id);
+        }
 
         router.push('/');
         router.refresh();
@@ -114,6 +127,16 @@ export default function AuthForm({ state = 'signin' }: AuthFormProps) {
         <CardDescription>{getDescription()}</CardDescription>
       </CardHeader>
       <CardContent>
+        {state === 'signin' && (
+          <>
+            <ContinueWithOweb />
+            <div className="my-4 flex items-center gap-3">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-xs text-muted-foreground">or</span>
+              <div className="h-px flex-1 bg-border" />
+            </div>
+          </>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="email">Email</Label>

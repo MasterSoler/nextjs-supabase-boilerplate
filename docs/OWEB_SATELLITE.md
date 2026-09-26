@@ -16,7 +16,14 @@ Auth uses storage key `ao-supabase-auth` (see `utils/supabase/auth-options.ts`).
 ## OneID
 
 - App id: `paystub` (`lib/oweb/config.ts`)
-- After sign-in, the client calls `POST /api/oweb/activate` to register `one_id_app_activations` on OWeb.
+- After sign-in or SSO, the app calls `POST /api/oweb/activate` (app + workspace activation + `paystub.profiles` upsert).
+- **Continue with OWeb:** `oweb.one/login?launch=paystub` → App Store mint → `/sso?launch_token=…` (see `SATELLITE_AUTH_RETURN.md` on OWeb).
+
+## Server env
+
+| Variable | Purpose |
+|---|---|
+| `SUPABASE_SERVICE_ROLE_KEY` | Redeem `ao_ecosystem_launch_tokens` in `POST /api/oweb/sso` |
 
 ## OWeb App Store
 

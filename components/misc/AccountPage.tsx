@@ -19,6 +19,7 @@ import { useRouter } from 'next/navigation';
 import { createApiClient } from '@/utils/supabase/api';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTenant } from '@/utils/tenant-context';
+import { getOneIdHandle } from '@/lib/oweb/one-id';
 import { getUserTenants } from '@/utils/supabase/queries';
 
 interface Tenant {
@@ -37,6 +38,7 @@ export default function AccountPage({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const { currentTenant, setCurrentTenant, userTenants, setUserTenants } = useTenant();
+  const oneIdHandle = getOneIdHandle(user);
 
   useEffect(() => {
     const loadTenants = async () => {
@@ -157,6 +159,17 @@ export default function AccountPage({
                 </form>
               </CardContent>
             </Card>
+            {oneIdHandle ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>OneID</CardTitle>
+                  <CardDescription>Your OWeb constellation handle</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Input value={oneIdHandle} disabled />
+                </CardContent>
+              </Card>
+            ) : null}
             <Card>
               <CardHeader>
                 <CardTitle>Current Tenant</CardTitle>
