@@ -1,3 +1,4 @@
+import { paystubDb } from '@/utils/supabase/paystub-db';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 export const getUser = async (supabase: SupabaseClient) => {
@@ -13,7 +14,7 @@ export async function getEmployees(
   page?: number,
   itemsPerPage?: number
 ) {
-  let query = supabase
+  let query = paystubDb(supabase)
     .from('Employees')
     .select(`
       *,
@@ -47,8 +48,7 @@ export async function getEmployees(
 }
 
 export async function getEmployee(supabase: SupabaseClient, id: string) {
-  const { data: employee, error } = await supabase
-    .from('Employees')
+  const { data: employee, error } = await paystubDb(supabase).from('Employees')
     .select('*')
     .eq('id', id)
     .eq('is_deleted', false)
@@ -63,8 +63,7 @@ export async function getEmployee(supabase: SupabaseClient, id: string) {
 }
 
 export async function addEmployee(supabase: SupabaseClient, employeeData: any) {
-  const { data, error } = await supabase
-    .from('Employees')
+  const { data, error } = await paystubDb(supabase).from('Employees')
     .insert([{
       ...employeeData,
       is_deleted: false
@@ -80,8 +79,7 @@ export async function addEmployee(supabase: SupabaseClient, employeeData: any) {
 }
 
 export async function updateEmployee(supabase: SupabaseClient, employeeData: any) {
-  const { data, error } = await supabase
-    .from('Employees')
+  const { data, error } = await paystubDb(supabase).from('Employees')
     .update([{
       ...employeeData,
       updated_at: new Date().toISOString()
@@ -103,7 +101,7 @@ export async function getClients(
   page?: number,
   itemsPerPage?: number
 ) {
-  let query = supabase
+  let query = paystubDb(supabase)
     .from('Clients')
     .select('*', { count: 'exact' })
     .eq('is_deleted', false)
@@ -126,8 +124,7 @@ export async function getClients(
 }
 
 export async function getClient(supabase: SupabaseClient, id: string) {
-  const { data: client, error } = await supabase
-    .from('Clients')
+  const { data: client, error } = await paystubDb(supabase).from('Clients')
     .select('*')
     .eq('id', id)
     .eq('is_deleted', false)
@@ -142,8 +139,7 @@ export async function getClient(supabase: SupabaseClient, id: string) {
 }
 
 export async function addClient(supabase: SupabaseClient, clientData: any) {
-  const { data, error } = await supabase
-    .from('Clients')
+  const { data, error } = await paystubDb(supabase).from('Clients')
     .insert([clientData])
     .select();
 
@@ -156,8 +152,7 @@ export async function addClient(supabase: SupabaseClient, clientData: any) {
 }
 
 export async function updateClient(supabase: SupabaseClient, clientData: any) {
-  const { data, error } = await supabase
-    .from('Clients')
+  const { data, error } = await paystubDb(supabase).from('Clients')
     .update([clientData])
     .eq('id', clientData.id)
     .select();
@@ -176,7 +171,7 @@ export async function getProjects(
   page?: number,
   itemsPerPage?: number
 ) {
-  let query = supabase
+  let query = paystubDb(supabase)
     .from('Projects')
     .select('*, Clients(name)', { count: 'exact' })
     // .eq('is_deleted', false)
@@ -204,8 +199,7 @@ export async function getProjects(
 }
 
 export async function getProject(supabase: SupabaseClient, id: string) {
-  const { data: project, error } = await supabase
-    .from('Projects')
+  const { data: project, error } = await paystubDb(supabase).from('Projects')
     .select('*')
     .eq('id', id)
     // .eq('is_deleted', false)
@@ -220,8 +214,7 @@ export async function getProject(supabase: SupabaseClient, id: string) {
 }
     
 export async function addProject(supabase: SupabaseClient, projectData: any) {
-  const { data, error } = await supabase
-    .from('Projects')
+  const { data, error } = await paystubDb(supabase).from('Projects')
     .insert([projectData])
     .select();
 
@@ -234,8 +227,7 @@ export async function addProject(supabase: SupabaseClient, projectData: any) {
 }
 
 export async function updateProject(supabase: SupabaseClient, projectData: any) {
-  const { data, error } = await supabase
-    .from('Projects')
+  const { data, error } = await paystubDb(supabase).from('Projects')
     .update([projectData])
     .eq('id', projectData.id)
     .select();
@@ -253,8 +245,7 @@ export async function searchClients(
   supabase: SupabaseClient,
   searchTerm: string
 ) {
-  const { data: clients, error } = await supabase
-    .from('Clients')
+  const { data: clients, error } = await paystubDb(supabase).from('Clients')
     .select('*')
     .eq('is_deleted', false)
     .ilike('name', `%${searchTerm}%`)
@@ -274,7 +265,7 @@ export async function getAllocations(
   page?: number,
   itemsPerPage?: number
 ) {
-  let query = supabase
+  let query = paystubDb(supabase)
     .from('Allocations')
     .select(`
       *,
@@ -308,8 +299,7 @@ export async function getAllocations(
 
 export async function getAllocation(supabase: SupabaseClient, id: string) {
   // First, get the basic allocation data
-  const { data: allocation, error: allocationError } = await supabase
-    .from('Allocations')
+  const { data: allocation, error: allocationError } = await paystubDb(supabase).from('Allocations')
     .select('*')
     .eq('id', id)
     .eq('is_deleted', false)
@@ -321,14 +311,12 @@ export async function getAllocation(supabase: SupabaseClient, id: string) {
   }
 
   // Then get the employee and project details separately
-  const { data: employee } = await supabase
-    .from('Employees')
+  const { data: employee } = await paystubDb(supabase).from('Employees')
     .select('given_name, surname')
     .eq('id', allocation.employee_id)
     .single();
 
-  const { data: project } = await supabase
-    .from('Projects')
+  const { data: project } = await paystubDb(supabase).from('Projects')
     .select('name, code')
     .eq('id', allocation.project_id)
     .single();
@@ -341,8 +329,7 @@ export async function getAllocation(supabase: SupabaseClient, id: string) {
 }
 
 export async function addAllocation(supabase: SupabaseClient, allocationData: any) {
-  const { data, error } = await supabase
-    .from('Allocations')
+  const { data, error } = await paystubDb(supabase).from('Allocations')
     .insert([{
       ...allocationData,
       is_deleted: false
@@ -361,8 +348,7 @@ export async function updateAllocation(supabase: SupabaseClient, allocationData:
   // Remove nested objects before update
   const { Employees, Projects, employee_name, project_name, ...updateData } = allocationData;
   
-  const { data, error } = await supabase
-    .from('Allocations')
+  const { data, error } = await paystubDb(supabase).from('Allocations')
     .update({
       ...updateData,
       updated_at: new Date().toISOString()
@@ -379,8 +365,7 @@ export async function updateAllocation(supabase: SupabaseClient, allocationData:
 }
 
 export async function getUserTenants(supabase: SupabaseClient, userId: string) {
-  const { data: userTenants, error } = await supabase
-    .from('UserTenants')
+  const { data: userTenants, error } = await paystubDb(supabase).from('UserTenants')
     .select(`
       *,
       tenant:Tenants(*)
@@ -401,7 +386,7 @@ export async function getDepartments(
   page?: number,
   itemsPerPage?: number
 ) {
-  let query = supabase
+  let query = paystubDb(supabase)
     .from('Departments')
     .select(`
       *,
@@ -427,8 +412,7 @@ export async function getDepartments(
 }
 
 export async function getDepartment(supabase: SupabaseClient, id: string) {
-  const { data: department, error } = await supabase
-    .from('Departments')
+  const { data: department, error } = await paystubDb(supabase).from('Departments')
     .select(`
       *,
       parent_department:parent_department_id(*)
@@ -446,8 +430,7 @@ export async function getDepartment(supabase: SupabaseClient, id: string) {
 }
 
 export async function addDepartment(supabase: SupabaseClient, departmentData: any) {
-  const { data, error } = await supabase
-    .from('Departments')
+  const { data, error } = await paystubDb(supabase).from('Departments')
     .insert([{
       ...departmentData,
       is_deleted: false
@@ -465,8 +448,7 @@ export async function addDepartment(supabase: SupabaseClient, departmentData: an
 export async function updateDepartment(supabase: SupabaseClient, departmentData: any) {
   const { id, parent_department, ...updateData } = departmentData;
   
-  const { data, error } = await supabase
-    .from('Departments')
+  const { data, error } = await paystubDb(supabase).from('Departments')
     .update({
       ...updateData,
       updated_at: new Date().toISOString()
@@ -487,8 +469,7 @@ export async function addEmployeeDepartments(
   employeeId: string, 
   departmentIds: string[]
 ) {
-  const { error } = await supabase
-    .from('EmployeeDepartments')
+  const { error } = await paystubDb(supabase).from('EmployeeDepartments')
     .upsert(
       departmentIds.map(departmentId => ({
         employee_id: employeeId,
@@ -507,8 +488,7 @@ export async function removeEmployeeDepartments(
   supabase: SupabaseClient, 
   employeeId: string
 ) {
-  const { error } = await supabase
-    .from('EmployeeDepartments')
+  const { error } = await paystubDb(supabase).from('EmployeeDepartments')
     .delete()
     .eq('employee_id', employeeId);
 
@@ -524,7 +504,7 @@ export async function getKnowledges(
   page?: number,
   itemsPerPage?: number
 ) {
-  let query = supabase
+  let query = paystubDb(supabase)
     .from('Knowledges')
     .select('*', { count: 'exact' })
     .eq('is_deleted', false)
@@ -547,8 +527,7 @@ export async function getKnowledges(
 }
 
 export async function getKnowledge(supabase: SupabaseClient, id: string) {
-  const { data: knowledge, error } = await supabase
-    .from('Knowledges')
+  const { data: knowledge, error } = await paystubDb(supabase).from('Knowledges')
     .select('*')
     .eq('id', id)
     .eq('is_deleted', false)
@@ -563,8 +542,7 @@ export async function getKnowledge(supabase: SupabaseClient, id: string) {
 }
 
 export async function addKnowledge(supabase: SupabaseClient, knowledgeData: any) {
-  const { data, error } = await supabase
-    .from('Knowledges')
+  const { data, error } = await paystubDb(supabase).from('Knowledges')
     .insert([{
       ...knowledgeData,
       is_deleted: false
@@ -582,8 +560,7 @@ export async function addKnowledge(supabase: SupabaseClient, knowledgeData: any)
 export async function updateKnowledge(supabase: SupabaseClient, knowledgeData: any) {
   const { id, ...updateData } = knowledgeData;
   
-  const { data, error } = await supabase
-    .from('Knowledges')
+  const { data, error } = await paystubDb(supabase).from('Knowledges')
     .update({
       ...updateData,
       updated_at: new Date().toISOString()
@@ -603,8 +580,7 @@ export async function getEmployeeKnowledge(
   supabase: SupabaseClient,
   employeeId: string
 ) {
-  const { data, error } = await supabase
-    .from('EmployeeKnowledges')
+  const { data, error } = await paystubDb(supabase).from('EmployeeKnowledges')
     .select(`
       *,
       knowledge:Knowledges(*)
@@ -624,8 +600,7 @@ export async function addEmployeeKnowledge(
   employeeId: string,
   knowledgeIds: string[]
 ) {
-  const { error } = await supabase
-    .from('EmployeeKnowledges')
+  const { error } = await paystubDb(supabase).from('EmployeeKnowledges')
     .insert(
       knowledgeIds.map(knowledgeId => ({
         employee_id: employeeId,
@@ -644,8 +619,7 @@ export async function removeEmployeeKnowledge(
   supabase: SupabaseClient,
   employeeId: string,
 ) {
-  const { error } = await supabase
-    .from('EmployeeKnowledges')
+  const { error } = await paystubDb(supabase).from('EmployeeKnowledges')
     .delete()
     .eq('employee_id', employeeId);
 
@@ -659,8 +633,7 @@ export async function getProjectKnowledges(
   supabase: SupabaseClient,
   projectId: string
 ) {
-  const { data, error } = await supabase
-    .from('ProjectKnowledges')
+  const { data, error } = await paystubDb(supabase).from('ProjectKnowledges')
     .select(`
       *,
       knowledge:Knowledges(*)
@@ -680,8 +653,7 @@ export async function addProjectKnowledge(
   projectId: string,
   knowledgeIds: string[]
 ) {
-  const { error } = await supabase
-    .from('ProjectKnowledges')
+  const { error } = await paystubDb(supabase).from('ProjectKnowledges')
     .insert(
       knowledgeIds.map(knowledgeId => ({
         project_id: projectId,
@@ -700,8 +672,7 @@ export async function removeProjectKnowledge(
   supabase: SupabaseClient,
   projectId: string,
 ) {
-  const { error } = await supabase
-    .from('ProjectKnowledges')
+  const { error } = await paystubDb(supabase).from('ProjectKnowledges')
     .delete()
     .eq('project_id', projectId);
 
@@ -718,8 +689,7 @@ export async function getEmployeeSuggestions(
 ) {
   if (!selectedKnowledges.length) return [];
 
-  const { data: employees, error } = await supabase
-    .from('Employees')
+  const { data: employees, error } = await paystubDb(supabase).from('Employees')
     .select(`
       id,
       given_name,
@@ -753,7 +723,7 @@ export async function getPositions(
   itemsPerPage?: number
 ) {
   try {
-    let query = supabase
+    let query = paystubDb(supabase)
       .from('Positions')
       .select(`
         *,
@@ -796,8 +766,7 @@ export async function getPosition(
   positionId: string
 ) {
   try {
-    const { data, error } = await supabase
-      .from('Positions')
+    const { data, error } = await paystubDb(supabase).from('Positions')
       .select(`
         *,
         department:Departments(id, name)
@@ -821,8 +790,7 @@ export async function addPosition(
   positionData: any
 ) {
   try {
-    const { data, error } = await supabase
-      .from('Positions')
+    const { data, error } = await paystubDb(supabase).from('Positions')
       .insert([positionData])
       .select()
       .single();
@@ -843,8 +811,7 @@ export async function updatePosition(
   positionData: any
 ) {
   try {
-    const { data, error } = await supabase
-      .from('Positions')
+    const { data, error } = await paystubDb(supabase).from('Positions')
       .update(positionData)
       .eq('id', positionData.id)
       .select()
@@ -868,7 +835,7 @@ export async function getContractTypes(
   itemsPerPage?: number
 ) {
   try {
-    let query = supabase
+    let query = paystubDb(supabase)
       .from('ContractTypes')
       .select('*', { count: 'exact' })
       .eq('tenant_id', tenantId)
@@ -898,8 +865,7 @@ export async function getContractType(
   contractTypeId: string
 ) {
   try {
-    const { data, error } = await supabase
-      .from('ContractTypes')
+    const { data, error } = await paystubDb(supabase).from('ContractTypes')
       .select('*')
       .eq('id', contractTypeId)
       .single();
@@ -920,8 +886,7 @@ export async function addContractType(
   contractTypeData: any
 ) {
   try {
-    const { data, error } = await supabase
-      .from('ContractTypes')
+    const { data, error } = await paystubDb(supabase).from('ContractTypes')
       .insert([contractTypeData])
       .select()
       .single();
@@ -942,8 +907,7 @@ export async function updateContractType(
   contractTypeData: any
 ) {
   try {
-    const { data, error } = await supabase
-      .from('ContractTypes')
+    const { data, error } = await paystubDb(supabase).from('ContractTypes')
       .update(contractTypeData)
       .eq('id', contractTypeData.id)
       .select()
@@ -968,7 +932,7 @@ export async function getEmployeeContracts(
   employeeId?: string
 ) {
   try {
-    let query = supabase
+    let query = paystubDb(supabase)
       .from('EmployeeContracts')
       .select(`
         *,
@@ -1015,8 +979,7 @@ export async function getEmployeeContract(
   contractId: string
 ) {
   try {
-    const { data, error } = await supabase
-      .from('EmployeeContracts')
+    const { data, error } = await paystubDb(supabase).from('EmployeeContracts')
       .select(`
         *,
         employee:Employees(id, given_name, surname),
@@ -1042,8 +1005,7 @@ export async function addEmployeeContract(
   contractData: any
 ) {
   try {
-    const { data, error } = await supabase
-      .from('EmployeeContracts')
+    const { data, error } = await paystubDb(supabase).from('EmployeeContracts')
       .insert([contractData])
       .select()
       .single();
@@ -1064,8 +1026,7 @@ export async function updateEmployeeContract(
   contractData: any
 ) {
   try {
-    const { data, error } = await supabase
-      .from('EmployeeContracts')
+    const { data, error } = await paystubDb(supabase).from('EmployeeContracts')
       .update(contractData)
       .eq('id', contractData.id)
       .select()
@@ -1090,7 +1051,7 @@ export async function getPublicHolidays(
   itemsPerPage?: number
 ) {
   try {
-    let query = supabase
+    let query = paystubDb(supabase)
       .from('PublicHolidays')
       .select('*', { count: 'exact' })
       .eq('tenant_id', tenantId)
@@ -1126,8 +1087,7 @@ export async function getPublicHoliday(
   holidayId: string
 ) {
   try {
-    const { data, error } = await supabase
-      .from('PublicHolidays')
+    const { data, error } = await paystubDb(supabase).from('PublicHolidays')
       .select('*')
       .eq('id', holidayId)
       .single();
@@ -1148,8 +1108,7 @@ export async function addPublicHoliday(
   holidayData: any
 ) {
   try {
-    const { data, error } = await supabase
-      .from('PublicHolidays')
+    const { data, error } = await paystubDb(supabase).from('PublicHolidays')
       .insert([holidayData])
       .select()
       .single();
@@ -1170,8 +1129,7 @@ export async function updatePublicHoliday(
   holidayData: any
 ) {
   try {
-    const { data, error } = await supabase
-      .from('PublicHolidays')
+    const { data, error } = await paystubDb(supabase).from('PublicHolidays')
       .update(holidayData)
       .eq('id', holidayData.id)
       .select()
@@ -1193,8 +1151,7 @@ export async function bulkAddPublicHolidays(
   holidays: any[]
 ) {
   try {
-    const { data, error } = await supabase
-      .from('PublicHolidays')
+    const { data, error } = await paystubDb(supabase).from('PublicHolidays')
       .insert(holidays)
       .select();
 
@@ -1216,7 +1173,7 @@ export async function getWorkScheduleTypes(
   itemsPerPage?: number
 ) {
   try {
-    let query = supabase
+    let query = paystubDb(supabase)
       .from('WorkScheduleTypes')
       .select('*', { count: 'exact' })
       .eq('tenant_id', tenantId)
@@ -1246,8 +1203,7 @@ export async function getWorkScheduleType(
   scheduleTypeId: string
 ) {
   try {
-    const { data, error } = await supabase
-      .from('WorkScheduleTypes')
+    const { data, error } = await paystubDb(supabase).from('WorkScheduleTypes')
       .select('*')
       .eq('id', scheduleTypeId)
       .single();
@@ -1268,8 +1224,7 @@ export async function addWorkScheduleType(
   scheduleTypeData: any
 ) {
   try {
-    const { data, error } = await supabase
-      .from('WorkScheduleTypes')
+    const { data, error } = await paystubDb(supabase).from('WorkScheduleTypes')
       .insert([scheduleTypeData])
       .select()
       .single();
@@ -1290,8 +1245,7 @@ export async function updateWorkScheduleType(
   scheduleTypeData: any
 ) {
   try {
-    const { data, error } = await supabase
-      .from('WorkScheduleTypes')
+    const { data, error } = await paystubDb(supabase).from('WorkScheduleTypes')
       .update(scheduleTypeData)
       .eq('id', scheduleTypeData.id)
       .select()
@@ -1318,7 +1272,7 @@ export async function getWorkLogs(
   itemsPerPage?: number
 ) {
   try {
-    let query = supabase
+    let query = paystubDb(supabase)
       .from('WorkLogs')
       .select(`
         *,
@@ -1373,8 +1327,7 @@ export async function getWorkLog(
   workLogId: string
 ) {
   try {
-    const { data, error } = await supabase
-      .from('WorkLogs')
+    const { data, error } = await paystubDb(supabase).from('WorkLogs')
       .select(`
         *,
         employee:Employees(id, given_name, surname),
@@ -1399,8 +1352,7 @@ export async function addWorkLog(
   workLogData: any
 ) {
   try {
-    const { data, error } = await supabase
-      .from('WorkLogs')
+    const { data, error } = await paystubDb(supabase).from('WorkLogs')
       .insert([workLogData])
       .select()
       .single();
@@ -1421,8 +1373,7 @@ export async function updateWorkLog(
   workLogData: any
 ) {
   try {
-    const { data, error } = await supabase
-      .from('WorkLogs')
+    const { data, error } = await paystubDb(supabase).from('WorkLogs')
       .update(workLogData)
       .eq('id', workLogData.id)
       .select()
@@ -1445,8 +1396,7 @@ export async function approveWorkLog(
   approverId: string
 ) {
   try {
-    const { data, error } = await supabase
-      .from('WorkLogs')
+    const { data, error } = await paystubDb(supabase).from('WorkLogs')
       .update({
         status: 'approved',
         approved_by: approverId,
@@ -1473,8 +1423,7 @@ export async function rejectWorkLog(
   approverId: string
 ) {
   try {
-    const { data, error } = await supabase
-      .from('WorkLogs')
+    const { data, error } = await paystubDb(supabase).from('WorkLogs')
       .update({
         status: 'rejected',
         approved_by: approverId,
@@ -1500,8 +1449,7 @@ export async function bulkAddWorkLogs(
   workLogs: any[]
 ) {
   try {
-    const { data, error } = await supabase
-      .from('WorkLogs')
+    const { data, error } = await paystubDb(supabase).from('WorkLogs')
       .insert(workLogs.map(log => ({
         ...log,
         status: 'pending'
@@ -1521,8 +1469,7 @@ export async function bulkAddWorkLogs(
 
 // Lead Sources
 export async function getLeadSources(supabase: SupabaseClient, tenantId: string) {
-  const { data: sources, error } = await supabase
-    .from('LeadSources')
+  const { data: sources, error } = await paystubDb(supabase).from('LeadSources')
     .select('*')
     .eq('tenant_id', tenantId)
     .eq('is_active', true)
@@ -1538,8 +1485,7 @@ export async function getLeadSources(supabase: SupabaseClient, tenantId: string)
 
 // Lead Stages
 export async function getLeadStages(supabase: SupabaseClient, tenantId: string) {
-  const { data: stages, error } = await supabase
-    .from('LeadStages')
+  const { data: stages, error } = await paystubDb(supabase).from('LeadStages')
     .select('*')
     .eq('tenant_id', tenantId)
     .eq('is_active', true)
@@ -1576,8 +1522,7 @@ export async function addLead(supabase: SupabaseClient, leadData: LeadData) {
     assigned_to: leadData.assigned_to || null
   };
 
-  const { data, error } = await supabase
-    .from('Leads')
+  const { data, error } = await paystubDb(supabase).from('Leads')
     .insert([cleanedData])
     .select();
 
@@ -1595,8 +1540,7 @@ export async function updateLead(supabase: SupabaseClient, leadData: LeadData) {
     assigned_to: leadData.assigned_to || null
   };
 
-  const { data, error } = await supabase
-    .from('Leads')
+  const { data, error } = await paystubDb(supabase).from('Leads')
     .update(cleanedData)
     .eq('id', leadData.id)
     .select();
@@ -1617,7 +1561,7 @@ export async function getLeads(
   page?: number,
   itemsPerPage?: number
 ) {
-  let query = supabase
+  let query = paystubDb(supabase)
     .from('Leads')
     .select(`
       *,
@@ -1662,8 +1606,7 @@ export async function getLeads(
 // }
 
 export async function getLead(supabase: SupabaseClient, id: string) {
-  const { data: lead, error } = await supabase
-    .from('Leads')
+  const { data: lead, error } = await paystubDb(supabase).from('Leads')
     .select(`
       *,
       source:source_id(name),
@@ -1691,8 +1634,7 @@ export async function updateLeadStage(
 ) {
   try {
     // First get the current stage and tenant_id
-    const { data: lead, error: leadError } = await supabase
-      .from('Leads')
+    const { data: lead, error: leadError } = await paystubDb(supabase).from('Leads')
       .select('current_stage_id, tenant_id')
       .eq('id', leadId)
       .single();
@@ -1741,7 +1683,7 @@ export async function getLeadsByStage(
   tenantId: string,
   stageId?: string
 ) {
-  let query = supabase
+  let query = paystubDb(supabase)
     .from('Leads')
     .select(`
       *,
@@ -1827,8 +1769,7 @@ export async function getLeadsList(
   page: number,
   itemsPerPage: number
 ) {
-  const { data: leads, count, error } = await supabase
-    .from('Leads')
+  const { data: leads, count, error } = await paystubDb(supabase).from('Leads')
     .select(`
       *,
       source:source_id(name),
@@ -1872,8 +1813,7 @@ export interface LeadDocument {
 }
 
 export async function getLeadActivities(supabase: SupabaseClient, leadId: string) {
-  const { data, error } = await supabase
-    .from('LeadActivities')
+  const { data, error } = await paystubDb(supabase).from('LeadActivities')
     .select(`
       *,
       performed_by:Employees(given_name, surname)
@@ -1890,8 +1830,7 @@ export async function getLeadActivities(supabase: SupabaseClient, leadId: string
 }
 
 export async function addLeadActivity(supabase: SupabaseClient, activity: Omit<LeadActivity, 'id'>) {
-  const { data, error } = await supabase
-    .from('LeadActivities')
+  const { data, error } = await paystubDb(supabase).from('LeadActivities')
     .insert([activity])
     .select();
 
@@ -1904,8 +1843,7 @@ export async function addLeadActivity(supabase: SupabaseClient, activity: Omit<L
 }
 
 export async function getLeadDocuments(supabase: SupabaseClient, leadId: string) {
-  const { data, error } = await supabase
-    .from('LeadDocuments')
+  const { data, error } = await paystubDb(supabase).from('LeadDocuments')
     .select(`
       *,
       uploaded_by:Employees(given_name, surname)
@@ -1956,8 +1894,7 @@ export async function addLeadDocument(
       .getPublicUrl(filePath);
 
     // Create document record
-    const { data, error } = await supabase
-      .from('LeadDocuments')
+    const { data, error } = await paystubDb(supabase).from('LeadDocuments')
       .insert([{
         lead_id: documentData.lead_id,
         name: file.name,
@@ -1979,8 +1916,7 @@ export async function addLeadDocument(
 }
 
 export async function getActiveEmployees(supabase: SupabaseClient, tenantId: string) {
-  const { data: employees, error } = await supabase
-    .from('Employees')
+  const { data: employees, error } = await paystubDb(supabase).from('Employees')
     .select('id, given_name, surname')
     .eq('tenant_id', tenantId)
     .eq('is_deleted', false)
@@ -2016,8 +1952,7 @@ export async function deleteLeadDocument(
     if (storageError) throw storageError;
 
     // Delete record from database
-    const { error: dbError } = await supabase
-      .from('LeadDocuments')
+    const { error: dbError } = await paystubDb(supabase).from('LeadDocuments')
       .delete()
       .eq('id', document.id);
 
@@ -2046,8 +1981,7 @@ export async function addLeadFollowUp(
   supabase: SupabaseClient, 
   followUp: Omit<LeadFollowUp, 'id' | 'status'>
 ) {
-  const { data, error } = await supabase
-    .from('LeadFollowUps')
+  const { data, error } = await paystubDb(supabase).from('LeadFollowUps')
     .insert([{
       ...followUp,
       status: 'pending'
@@ -2063,8 +1997,7 @@ export async function getLeadFollowUps(
   supabase: SupabaseClient,
   leadId: string
 ) {
-  const { data, error } = await supabase
-    .from('LeadFollowUps')
+  const { data, error } = await paystubDb(supabase).from('LeadFollowUps')
     .select(`
       *,
       assigned_to:Employees(given_name, surname)
@@ -2080,8 +2013,7 @@ export async function completeFollowUp(
   supabase: SupabaseClient,
   followUpId: string
 ) {
-  const { data, error } = await supabase
-    .from('LeadFollowUps')
+  const { data, error } = await paystubDb(supabase).from('LeadFollowUps')
     .update({
       status: 'completed',
       completed_at: new Date().toISOString()
@@ -2117,8 +2049,7 @@ export async function convertLeadToClient(
 ) {
   try {
     // Start a transaction
-    const { data: lead, error: leadError } = await supabase
-      .from('Leads')
+    const { data: lead, error: leadError } = await paystubDb(supabase).from('Leads')
       .select('*')
       .eq('id', leadId)
       .single();
@@ -2126,8 +2057,7 @@ export async function convertLeadToClient(
     if (leadError) throw leadError;
 
     // Create client record
-    const { data: client, error: clientError } = await supabase
-      .from('Clients')
+    const { data: client, error: clientError } = await paystubDb(supabase).from('Clients')
       .insert([{
         name: lead.company_name,
         client_code: lead.company_name.substring(0, 8).toUpperCase(),
@@ -2145,8 +2075,7 @@ export async function convertLeadToClient(
     if (clientError) throw clientError;
 
     // Record conversion
-    const { error: conversionError } = await supabase
-      .from('LeadConversions')
+    const { error: conversionError } = await paystubDb(supabase).from('LeadConversions')
       .insert([{
         lead_id: leadId,
         converted_at: new Date().toISOString(),
@@ -2160,8 +2089,7 @@ export async function convertLeadToClient(
     if (conversionError) throw conversionError;
 
     // Update lead status
-    const { error: updateError } = await supabase
-      .from('Leads')
+    const { error: updateError } = await paystubDb(supabase).from('Leads')
       .update({ status: 'converted' })
       .eq('id', leadId);
 

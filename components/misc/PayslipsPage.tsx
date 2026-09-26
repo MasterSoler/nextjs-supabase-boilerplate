@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import { paystubDb } from '@/utils/supabase/paystub-db';
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
@@ -55,8 +57,7 @@ export default function PayslipsPage() {
 
         // Get payslip status for each contract
         const monthStart = format(parse(`${selectedMonth}01`, 'yyyyMMdd', new Date()), 'yyyy-MM-dd');
-        const { data: payslips } = await supabase
-          .from('Payslips')
+        const { data: payslips } = await paystubDb(supabase).from('Payslips')
           .select('id, contract_id, status')
           .eq('period_start', monthStart);
 

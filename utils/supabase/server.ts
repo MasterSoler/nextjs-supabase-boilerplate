@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { ResponseCookie } from 'next/dist/compiled/@edge-runtime/cookies';
+import { supabaseAuthOptions } from '@/utils/supabase/auth-options';
 
 export async function createClient() {
   const cookieStore = await cookies();
@@ -9,6 +10,7 @@ export async function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      ...supabaseAuthOptions,
       cookies: {
         get(name: string) {
           return cookieStore.get(name)?.value;

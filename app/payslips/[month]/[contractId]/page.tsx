@@ -1,3 +1,4 @@
+import { paystubDb } from '@/utils/supabase/paystub-db';
 import { createClient } from '@/utils/supabase/server';
 import { getUser } from '@/utils/supabase/queries';
 import AddPayslipForm from '@/components/misc/AddPayslipForm';
@@ -18,8 +19,7 @@ export default async function EditPayslip({ params }: PageProps) {
   }
 
   // Check if payslip exists for this month and contract
-  const { data: existingPayslip } = await supabase
-    .from('Payslips')
+  const { data: existingPayslip } = await paystubDb(supabase).from('Payslips')
     .select('id')
     .eq('contract_id', contractId)
     .eq('period_start', `${month.substring(0, 4)}-${month.substring(4, 6)}-01`)

@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import { paystubDb } from '@/utils/supabase/paystub-db';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
@@ -226,8 +228,7 @@ export default function AddProjectForm({ projectId }: { projectId: string | null
       if (!projectId || !currentTenant) return;
       
       try {
-        const { data: employees } = await supabase
-          .from('Employees')
+        const { data: employees } = await paystubDb(supabase).from('Employees')
           .select(`
             id,
             given_name,
@@ -901,8 +902,7 @@ export default function AddProjectForm({ projectId }: { projectId: string | null
       setAddingAllocationForEmployee(null);
 
       // Refresh allocated employees
-      const { data: employees } = await supabase
-        .from('Employees')
+      const { data: employees } = await paystubDb(supabase).from('Employees')
         .select(`
           id,
           given_name,

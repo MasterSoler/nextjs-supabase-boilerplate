@@ -51,7 +51,8 @@ export default function AuthForm({ state = 'signin' }: AuthFormProps) {
         // Store tenant in localStorage for persistence
         localStorage.setItem('currentTenant', JSON.stringify(defaultTenant));
 
-        // Redirect to home page
+        await fetch('/api/oweb/activate', { method: 'POST' }).catch(() => undefined);
+
         router.push('/');
         router.refresh();
       } else if (state === 'signup') {

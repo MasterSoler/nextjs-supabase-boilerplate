@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import { paystubDb } from '@/utils/supabase/paystub-db';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -89,8 +91,7 @@ export default function AddPayslipForm({
 
       // If editing, get existing payslip first
       if (payslipId) {
-        const { data: payslip, error: payslipError } = await supabase
-          .from('Payslips')
+        const { data: payslip, error: payslipError } = await paystubDb(supabase).from('Payslips')
           .select(`
             *,
             contract:EmployeeContracts(
@@ -120,8 +121,7 @@ export default function AddPayslipForm({
           });
 
           // Get work logs for the period
-          const { data: logs } = await supabase
-            .from('WorkLogs')
+          const { data: logs } = await paystubDb(supabase).from('WorkLogs')
             .select('*, schedule_type:WorkScheduleTypes(name, multiplier)')
             .eq('employee_id', payslip.contract.employee.id)
             .gte('date', payslip.period_start)
@@ -141,8 +141,7 @@ export default function AddPayslipForm({
       }
 
       // If not editing or payslip not found, get contract details for new payslip
-      const { data: contract } = await supabase
-        .from('EmployeeContracts')
+      const { data: contract } = await paystubDb(supabase).from('EmployeeContracts')
         .select('*, position:Positions(title), contract_type:ContractTypes(name), employee:Employees(id)')
         .eq('id', contractId)
         .single();
@@ -161,8 +160,7 @@ export default function AddPayslipForm({
         }));
 
         // Get work logs for the period
-        const { data: logs } = await supabase
-          .from('WorkLogs')
+        const { data: logs } = await paystubDb(supabase).from('WorkLogs')
           .select('*, schedule_type:WorkScheduleTypes(name, multiplier)')
           .eq('employee_id', contract.employee.id)
           .gte('date', format(monthStart, 'yyyy-MM-dd'))
@@ -272,13 +270,11 @@ export default function AddPayslipForm({
       };
 
       if (payslipId) {
-        await supabase
-          .from('Payslips')
+        await paystubDb(supabase).from('Payslips')
           .update(payslipData)
           .eq('id', payslipId);
       } else {
-        await supabase
-          .from('Payslips')
+        await paystubDb(supabase).from('Payslips')
           .insert([payslipData]);
       }
 

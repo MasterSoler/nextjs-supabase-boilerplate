@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import { paystubDb } from '@/utils/supabase/paystub-db';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -125,8 +127,7 @@ export default function AddEmployeeForm({ employeeId }: { employeeId: string | n
           if (employee && employee.tenant_id === currentTenant.id) {
             setFormData(employee);
             // Fetch employee's departments
-            const { data: employeeDepts } = await supabase
-              .from('EmployeeDepartments')
+            const { data: employeeDepts } = await paystubDb(supabase).from('EmployeeDepartments')
               .select('department_id')
               .eq('employee_id', employeeId);
             

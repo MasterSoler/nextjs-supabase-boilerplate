@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import { paystubDb } from '@/utils/supabase/paystub-db';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -113,19 +115,19 @@ export default function AddLeadForm({ leadId }: { leadId: string | null }) {
         { data: stagesData },
         { data: employeesData }
       ] = await Promise.all([
-        supabase
+        paystubDb(supabase)
           .from('LeadSources')
           .select('*')
           .eq('tenant_id', currentTenant!.id)
           .eq('is_active', true)
           .order('name'),
-        supabase
+        paystubDb(supabase)
           .from('LeadStages')
           .select('*')
           .eq('tenant_id', currentTenant!.id)
           .eq('is_active', true)
           .order('order_index'),
-        supabase
+        paystubDb(supabase)
           .from('Employees')
           .select('id, given_name, surname')
           .eq('tenant_id', currentTenant!.id)
@@ -139,7 +141,7 @@ export default function AddLeadForm({ leadId }: { leadId: string | null }) {
 
       // Load lead data if editing
       if (leadId) {
-        const { data: lead } = await supabase
+        const { data: lead } = await paystubDb(supabase)
           .from('Leads')
           .select('*')
           .eq('id', leadId)
