@@ -55,7 +55,10 @@ export function TenantProvider({ children }: { children: ReactNode }) {
         }
       } catch (error) {
         console.error('Error initializing tenant:', error);
-        // If there's an error, sign out the user
+        if (error instanceof Error && error.message === 'NEEDS_PAYSTUB_ACTIVATION') {
+          window.location.assign('/auth/activate');
+          return;
+        }
         await supabase.auth.signOut();
         setCurrentTenant(null);
         setUserTenants([]);

@@ -38,7 +38,8 @@ export async function updateSession(request: NextRequest) {
 
   const { data: { session } } = await supabase.auth.getSession();
 
-  if (!session && request.nextUrl.pathname !== '/auth/signin') {
+  const authPublicPaths = ['/auth/signin', '/auth/activate'];
+  if (!session && !authPublicPaths.some((p) => request.nextUrl.pathname.startsWith(p))) {
     return NextResponse.redirect(new URL('/auth/signin', request.url));
   }
 

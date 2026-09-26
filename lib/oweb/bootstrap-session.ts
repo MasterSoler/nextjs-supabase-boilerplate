@@ -6,6 +6,7 @@ import {
   type WorkspaceActivationKind
 } from '@/lib/oweb/activate-workspace';
 import { ensurePaystubProfile } from '@/lib/oweb/ensure-profile';
+import { ensurePaystubTenantForWorkspace } from '@/lib/oweb/ensure-tenants';
 import { resolvePrimaryWorkspaceId } from '@/lib/oweb/resolve-workspace';
 
 export type BootstrapSessionInput = {
@@ -38,6 +39,7 @@ export async function bootstrapOwebSession(
       workspaceId,
       workspaceKindFor(input.activationKind)
     );
+    await ensurePaystubTenantForWorkspace(input.userId, workspaceId);
   }
 
   return { workspaceId };

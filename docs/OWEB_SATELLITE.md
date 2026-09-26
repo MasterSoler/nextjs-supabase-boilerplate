@@ -29,6 +29,12 @@ Auth uses storage key `ao-supabase-auth` (see `utils/supabase/auth-options.ts`).
 
 Register in OWeb `src/lib/ecosystem-apps.ts` with `launchUrl` pointing at this Vercel deployment (see companion PR on `MasterSoler/OWeb`).
 
+## Tenants ↔ OWeb workspaces
+
+Paystub `Tenants.id` matches **`ao_orgs.id`**. On workspace activation, the app upserts `Tenants` + `UserTenants` and records `one_id_workspace_activations` via OWeb API.
+
+Users without a provisioned tenant land on **`/auth/activate`** to pick a workspace.
+
 ## Database
 
 Apply migrations under `supabase/migrations/` to One OS, and ensure **`paystub`** is listed under Supabase **Project Settings → API → Exposed schemas** (same pattern as `schedulingpoll`, `corpus`, etc.).

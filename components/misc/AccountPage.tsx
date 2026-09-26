@@ -143,6 +143,7 @@ export default function AccountPage({
             <Link href="#" className="font-semibold text-primary">
               General
             </Link>
+            <Link href="/auth/activate">Activate workspace</Link>
             <Link href="mailto:">Support</Link>
           </nav>
           <div className="grid gap-6">
