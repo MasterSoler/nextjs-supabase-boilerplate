@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ContinueWithOweb } from '@/components/misc/ContinueWithOweb';
+import { owebSignupUrl } from '@/lib/oweb/config';
 import { persistWorkspaceId } from '@/lib/oweb/workspace-storage';
-import { verifyUserTenant } from '@/utils/auth-helpers';
+import { resolveTenantAfterAuth } from '@/lib/oweb/post-auth';
 import { useTenant } from '@/utils/tenant-context';
 
 export type AuthState = 'signin' | 'signup' | 'forgot_password';
@@ -44,15 +45,6 @@ export default function AuthForm({ state = 'signin' }: AuthFormProps) {
         if (signInError) throw signInError;
         if (!user) throw new Error('No user returned from sign-in');
 
-        // Verify tenant access and get default tenant
-        const defaultTenant = await verifyUserTenant(supabase, user.id);
-        
-        // Set the default tenant in context
-        setCurrentTenant(defaultTenant);
-
-        // Store tenant in localStorage for persistence
-        localStorage.setItem('currentTenant', JSON.stringify(defaultTenant));
-
         const activateRes = await fetch('/api/oweb/activate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -65,6 +57,17 @@ export default function AuthForm({ state = 'signin' }: AuthFormProps) {
           };
           if (payload.workspace_id) persistWorkspaceId(payload.workspace_id);
         }
+
+        const { needsActivation, tenant } = await resolveTenantAfterAuth(supabase, user.id);
+
+        if (needsActivation || !tenant) {
+          router.push('/auth/activate');
+          router.refresh();
+          return;
+        }
+
+        setCurrentTenant(tenant);
+        localStorage.setItem('currentTenant', JSON.stringify(tenant));
 
         router.push('/');
         router.refresh();
@@ -171,6 +174,14 @@ export default function AuthForm({ state = 'signin' }: AuthFormProps) {
             {getButtonText()}
           </Button>
         </form>
+        {state === 'signin' ? (
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            New to OneID?{' '}
+            <a href={owebSignupUrl()} className="text-primary underline-offset-4 hover:underline">
+              Create account on OWeb
+            </a>
+          </p>
+        ) : null}
       </CardContent>
     </Card>
   );

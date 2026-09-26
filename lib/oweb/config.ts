@@ -16,3 +16,9 @@ export function owebLoginUrl(options?: { launch?: boolean }) {
   }
   return url.toString();
 }
+
+export function owebSignupUrl() {
+  const url = new URL('/signup', OWEB_BASE_URL);
+  url.searchParams.set('launch', OWEB_APP_ID);
+  return url.toString();
+}

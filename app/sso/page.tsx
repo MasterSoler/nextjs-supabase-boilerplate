@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 
 import { persistWorkspaceId } from '@/lib/oweb/workspace-storage';
-import { verifyUserTenant } from '@/utils/auth-helpers';
+import { resolveTenantAfterAuth } from '@/lib/oweb/post-auth';
 import { createClient } from '@/utils/supabase/client';
 import { useTenant } from '@/utils/tenant-context';
 
@@ -54,9 +54,13 @@ function SsoPageInner() {
         } = await supabase.auth.getUser();
 
         if (user) {
-          const defaultTenant = await verifyUserTenant(supabase, user.id);
-          setCurrentTenant(defaultTenant);
-          localStorage.setItem('currentTenant', JSON.stringify(defaultTenant));
+          const { needsActivation, tenant } = await resolveTenantAfterAuth(supabase, user.id);
+          if (needsActivation || !tenant) {
+            window.location.assign('/auth/activate');
+            return;
+          }
+          setCurrentTenant(tenant);
+          localStorage.setItem('currentTenant', JSON.stringify(tenant));
         }
 
         window.location.assign('/');
